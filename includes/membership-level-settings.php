@@ -150,7 +150,7 @@ function pmpro_bp_level_settings()
 				<tr>
 				<th scope="row" valign="top"><label for="pmpro_bp_member_directory"><?php _e('Include in Member Directory', 'pmpro');?>:</label></th>
 				<td>
-					<select name="pmpro_bp_member_directory" id="pmpro_bp_send_friend_request">
+					<select name="pmpro_bp_member_directory" id="pmpro_bp_member_directory">
 							<option value= '0' <?php if($pmpro_bp_member_directory == 0) echo "selected"; ?> >No</option>
 							<option value= '1' <?php if($pmpro_bp_member_directory == 1) echo "selected"; ?>>Yes</option>
 					</select>

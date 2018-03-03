@@ -13,6 +13,11 @@ add_action('add_user_meta', 'pmpro_bp_add_user_meta', 10, 3);
 
 function pmpro_bp_update_user_meta($meta_id, $user_id, $meta_key, $meta_value)
 {
+	//don't break if Register Helper is not loaded
+	if(!function_exists( 'pmprorh_add_registration_field' )) {
+		return;
+	} 
+	 
 	//see if the meta field is in the RH defined fields, and has the BuddyPress property set
 	global $pmprorh_registration_fields;
 	
@@ -36,6 +41,11 @@ function pmpro_bp_update_user_meta($meta_id, $user_id, $meta_key, $meta_value)
 
 function pmpro_bp_xprofile_updated_profile($user_id, $posted_field_ids, $errors, $old_values, $new_values) 
 {
+	//don't break if Register Helper is not loaded
+	if(!function_exists( 'pmprorh_add_registration_field' )) {
+		return;
+	}  
+	 
 	global $pmprorh_registration_fields;
 	
 	if ( empty( $errors ) ) 

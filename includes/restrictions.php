@@ -21,21 +21,28 @@ function pmpro_bp_user_can_create_groups( $user_id = NULL ) {
 	}
 	
 	//must have a level
-	if( !function_exists( 'pmpro_hasMembershipLevel' ) || !pmpro_hasMembershipLevel( NULL, $user_id ) ) {
-		return false;
+	$level = pmpro_getMembershipLevelForUser($user_id);
+	$has_access_to_level = false;
+	
+	if(!empty($level) && !empty($level->id)) {
+		  $has_access_to_level = pmpro_hasMembershipLevel($level->id);
 	}
-		
-	$level = pmpro_getMembershipLevelForUser($user_id);			
-	$pmpro_bp_options = pmpro_bp_getLevelOptions($level->ID);	
+	
+	$pmpro_bp_options = pmpro_bp_getLevelOptions($level->ID);
 	
 	//are they restricting BuddyPress at all?
-	if($pmpro_bp_options['pmpro_bp_restrictions'] == 0)
+	if($pmpro_bp_options['pmpro_bp_restrictions'] == 0) {
 		return true;
+	}
 	
 	//see if this level is allowed to create groups	
 	$can_create = $pmpro_bp_options['pmpro_bp_group_creation'];	
 	
-	return $can_create;
+	if($can_create == 1 && $has_access_to_level) {
+		 return true;
+	}
+	
+	return false;
 }
 
 function pmpro_bp_user_can_view_single_group()
@@ -44,22 +51,23 @@ function pmpro_bp_user_can_view_single_group()
 		
 	//get the user's current level
 	$level = pmpro_getMembershipLevelForUser($current_user->ID);
-	
-	//disable single group viewing for those with no membership level.
-	if(empty($level))
-		return false;
+	$has_access_to_level = false;
+
+	if(!empty($level) && !empty($level->id)) {
+		  $has_access_to_level = pmpro_hasMembershipLevel($level->id);
+	}
 	
 	$pmpro_bp_options = pmpro_bp_getLevelOptions($level->ID);
 	
 		//are they restricting BuddyPress at all?
-	if($pmpro_bp_options['pmpro_bp_restrictions'] == 0)
+	if($pmpro_bp_options['pmpro_bp_restrictions'] == 0) {
 		return true;
+	}
 	
 	//see if that level is allowed to view individual groups
 	$can_view = $pmpro_bp_options['pmpro_bp_group_single_viewing'];
 		
-	if ( $can_view == 1 && !empty($level))
-	{
+	if ( $can_view == 1 && $has_access_to_level) {
 		return true;
 	}
 	
@@ -72,22 +80,22 @@ function pmpro_bp_user_can_view_groups_page()
 		
 	//get the user's current level
 	$level = pmpro_getMembershipLevelForUser($current_user->ID);
-	
-	//disable groups page viewing for those with no membership level.
-	if(empty($level))
-		return false;
+	$has_access_to_level = false;
+
+	if(!empty($level) && !empty($level->id)) {
+		  $has_access_to_level = pmpro_hasMembershipLevel($level->id);
+	}
 
 	$pmpro_bp_options = pmpro_bp_getLevelOptions($level->ID);
 	
 	//are they restricting BuddyPress at all?
-	if($pmpro_bp_options['pmpro_bp_restrictions'] == 0)
+	if($pmpro_bp_options['pmpro_bp_restrictions'] == 0) {
 		return true;
-	
+	}
 	//see if that level is allowed to create groups
 	$can_view = $pmpro_bp_options['pmpro_bp_groups_page_viewing'];
 		
-	if ( $can_view == 1 && !empty($level))
-	{
+	if ( $can_view == 1 && $has_access_to_level) {
 		return true;
 	}
 	
@@ -100,22 +108,23 @@ function pmpro_bp_user_can_join_groups()
 		
 	//get the user's current level
 	$level = pmpro_getMembershipLevelForUser($current_user->ID);
-	
-	//disable groups joining for those with no membership level.
-	if(empty($level))
-		return false;
+	$has_access_to_level = false;
+
+	if(!empty($level) && !empty($level->id)) {
+		  $has_access_to_level = pmpro_hasMembershipLevel($level->id);
+	}	
 
 	$pmpro_bp_options = pmpro_bp_getLevelOptions($level->ID);
 	
 	//are they restricting BuddyPress at all?
-	if($pmpro_bp_options['pmpro_bp_restrictions'] == 0)
+	if($pmpro_bp_options['pmpro_bp_restrictions'] == 0) {
 		return true;
+	}
 	
 	//see if that level is allowed to create groups
 	$can_join = $pmpro_bp_options['pmpro_bp_groups_join'];
 		
-	if ( $can_join == 1 && !empty($level))
-	{
+	if ( $can_join == 1 && $has_access_to_level) {
 		return true;
 	}
 	
@@ -202,8 +211,13 @@ function pmpro_bp_restrict_private_messaging() {
 	global $current_user, $pmpro_pages;
 	
 	$user_level = pmpro_getMembershipLevelForUser($current_user->ID);
+	$has_access_to_level = false;
+
+	if(!empty($user_level) && !empty($user_level->id)) {
+		  $has_access_to_level = pmpro_hasMembershipLevel($user_level->id);
+	}
 	
-	if($user_level)
+	if($user_level && $has_access_to_level)
 	{
 		$pmpro_bp_options = pmpro_bp_getLevelOptions($user_level->ID);
 		$pmpro_bp_private_messaging = $pmpro_bp_options['pmpro_bp_private_messaging'];
@@ -222,15 +236,15 @@ function pmpro_bp_bp_get_send_message_button_args($args)
 	global $current_user, $pmpro_pages;
 	
 	$user_level = pmpro_getMembershipLevelForUser($current_user->ID);
-	
-	if(!empty($user_level))
-	{
+	$has_access_to_level = false;
+
+	if(!empty($user_level) && !empty($user_level->id)) {
+		$has_access_to_level = pmpro_hasMembershipLevel($user_level->id);
 		$pmpro_bp_options = pmpro_bp_getLevelOptions($user_level->ID);
 		$pmpro_bp_private_messaging = $pmpro_bp_options['pmpro_bp_private_messaging'];
-		
 	}
 	
-	if(empty($pmpro_bp_private_messaging))
+	if(empty($pmpro_bp_private_messaging) || !$has_access_to_level)
 	{
 		$args['link_href'] = get_permalink($pmpro_pages['pmprobp_restricted']);
 	}
@@ -245,14 +259,15 @@ function pmpro_bp_bp_get_send_public_message_button($args)
 	global $current_user, $pmpro_pages;
 	
 	$user_level = pmpro_getMembershipLevelForUser($current_user->ID);
+	$has_access_to_level = false;
 	
-	if(!empty($user_level))
-	{	
+	if(!empty($user_level) && !empty($user_level->id)) {	
+		$has_access_to_level = pmpro_hasMembershipLevel($user_level->id);
 		$pmpro_bp_options = pmpro_bp_getLevelOptions($user_level->ID);
 		$pmpro_bp_public_messaging = $pmpro_bp_options['pmpro_bp_public_messaging'];
 	}
 	
-	if(empty($pmpro_bp_public_messaging))
+	if(empty($pmpro_bp_public_messaging) || !$has_access_to_level)
 	{
 		$args['link_href'] = get_permalink($pmpro_pages['pmprobp_restricted']);
 	}
@@ -267,8 +282,9 @@ function pmpro_bp_bp_get_add_friend_button($button)
 	global $current_user, $pmpro_pages;
 	
 	$user_level = pmpro_getMembershipLevelForUser($current_user->ID);
-	
-	if(empty($user_level))
+	$has_access_to_level = pmpro_hasMembershipLevel($user_level->id);
+
+	if(!$has_access_to_level)
 	{
 		$button['link_href'] = get_permalink($pmpro_pages['pmprobp_restricted']);
 	}
@@ -296,8 +312,13 @@ function pmpro_bp_lockdown_all_bp()
 	$bp_pages = get_option('bp-pages');
 
 	$level = pmpro_getMembershipLevelForUser();
+	$has_access_to_level = false;
 	
-	if(!empty($level))
+	if(!empty($level) && !empty($level->id)) {
+ 		$has_access_to_level = pmpro_hasMembershipLevel($level->id);
+	}
+	
+	if($has_access_to_level)
 	{
 		$pmpro_bp_options = pmpro_bp_getLevelOptions($level->ID);
 		$pmpro_bp_restrictions = $pmpro_bp_options['pmpro_bp_restrictions'];
