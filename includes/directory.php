@@ -8,7 +8,7 @@ function pmpro_bp_directory_init() {
 	if( !defined( 'PMPRO_VERSION' ) ) {
 		return;
 	}
-
+	
 	global $pmpro_bp_members_in_directory;
 	$pmpro_bp_members_in_directory = pmpro_bp_get_members_in_directory();
 	add_action( 'bp_pre_user_query_construct', 'pmpro_bp_bp_pre_user_query_construct', 1, 1 );
@@ -21,7 +21,7 @@ function pmpro_bp_bp_pre_user_query_construct( $query_array ) {
 	if( !pmpro_bp_is_member_directory_locked() ) {
 		return;
 	}
-	
+
 	if( bp_current_component() == 'friends' ) {
 		return;
 	}
@@ -35,7 +35,7 @@ function pmpro_bp_bp_pre_user_query_construct( $query_array ) {
 
 		if( is_array( $query_array->query_vars['include'] ) ) {
 			// Compute the intersect of members and include value.
-			$query_array->query_vars['include'] = array_intersect( $query_array->query_vars['include'], $pmpro_bp_members_in_directory );	
+			$query_array->query_vars['include'] = array_intersect( $query_array->query_vars['include'], $pmpro_bp_members_in_directory );
 		} else {
 			// Only include members in the directory.
 			$query_array->query_vars['include'] = $pmpro_bp_members_in_directory;
@@ -71,6 +71,10 @@ function pmpro_bp_get_members_in_directory() {
 		if( $pmpro_bp_options['pmpro_bp_member_directory'] == 1 || $pmpro_bp_options['pmpro_bp_restrictions'] == 1) {
 			$include_levels[] = $level->id;
 		}
+	}
+
+	if( empty( $include_levels ) ) {
+		return false;
 	}
 
 	$sql = "SELECT DISTINCT user_id FROM $wpdb->pmpro_memberships_users WHERE membership_id IN (" . implode(",", array_map("intval", $include_levels)) . ") AND status = 'active'";
